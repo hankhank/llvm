@@ -41,9 +41,11 @@ def BR   : I<(outs), (ins bb_op:$dst),
 // currently.
 let isTerminator = 1, hasCtrlDep = 1, isBarrier = 1 in {
 def SWITCH_I32 : I<(outs), (ins I32:$index, variable_ops),
-                   [(WebAssemblyswitch I32:$index)]>;
+                   [(WebAssemblyswitch I32:$index)],
+                   "switch $index">;
 def SWITCH_I64 : I<(outs), (ins I64:$index, variable_ops),
-                   [(WebAssemblyswitch I64:$index)]>;
+                   [(WebAssemblyswitch I64:$index)],
+                   "switch $index">;
 } // isTerminator = 1, hasCtrlDep = 1, isBarrier = 1
 
 // Placemarkers to indicate the start of a block or loop scope.
@@ -54,10 +56,14 @@ multiclass RETURN<WebAssemblyRegClass vt> {
   def RETURN_#vt : I<(outs), (ins vt:$val), [(WebAssemblyreturn vt:$val)],
                      "return $val">;
 }
-let isReturn = 1, isTerminator = 1, hasCtrlDep = 1, isBarrier = 1 in {
+
+let isTerminator = 1, hasCtrlDep = 1, isBarrier = 1 in {
+let isReturn = 1 in {
   defm : RETURN<I32>;
   defm : RETURN<I64>;
   defm : RETURN<F32>;
   defm : RETURN<F64>;
   def RETURN_VOID : I<(outs), (ins), [(WebAssemblyreturn)], "return">;
-} // isReturn = 1, isTerminator = 1, hasCtrlDep = 1, isBarrier = 1
+} // isReturn = 1
+  def UNREACHABLE : I<(outs), (ins), [(trap)], "unreachable">;
+} // isTerminator = 1, hasCtrlDep = 1, isBarrier = 1
